@@ -1,0 +1,26 @@
+package constant
+
+// General
+const (
+	APP_HOST    = "APP_HOST"
+	APP_VERSION = "APP_VERSION"
+	APP_NAME    = "APP_NAME"
+	APP_PORT    = "APP_PORT"
+	APP_ENV     = "APP_ENV"
+
+	JWT_KEY = "JWT_KEY"
+)
+
+// Db
+const (
+	DB_HOST    = "DB_HOST"
+	DB_USER    = "DB_USER"
+	DB_PASS    = "DB_PASS"
+	DB_PORT    = "DB_PORT"
+	DB_NAME    = "DB_NAME"
+	DB_SSLMODE = "DB_SSLMODE"
+	DB_TZ      = "DB_TZ"
+
+	MIGRATION_ENABLED = "MIGRATION_ENABLED"
+	SEEDER_ENABLED    = "SEEDER_ENABLED"
+)

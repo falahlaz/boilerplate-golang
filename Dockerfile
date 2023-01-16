@@ -12,7 +12,7 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=build ./go/app/src/bin ./app/bin
+COPY --from=build /go/app/src/bin /app/bin
 
 EXPOSE 8080
 ENTRYPOINT [ "/app/bin/api" ]
