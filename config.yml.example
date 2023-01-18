@@ -1,0 +1,35 @@
+server:
+  name: boilerplate-golang
+  version: 0.0.1
+  port: 3000
+  env: development
+
+databases:
+  - connection: pgsql
+    host: db
+    user: testuser
+    pass: supertestuser
+    port: 5432
+    name: boilerplate_golang_db
+    ssl: disable
+    tz: Asia/Jakarta
+    alias: postgres1
+    maxopenconn: 100
+    maxidleconn: 50
+    maxlifetime: 10
+    migration: true
+    seeder: false
+  - connection: pgsql
+    host: db2
+    user: testuser
+    pass: supertestuser
+    port: 5433
+    name: boilerplate_golang_db
+    ssl: disable
+    tz: Asia/Jakarta
+    alias: postgres2
+    maxopenconn: 100
+    maxidleconn: 50
+    maxlifetime: 10
+    migration: true
+    seeder: false

@@ -2,62 +2,72 @@ package database
 
 import (
 	"fmt"
-	"os"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
+	"github.com/falahlaz/boilerplate-golang/pkg/config"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
-type db struct {
-	Host string
-	User string
-	Pass string
-	Port string
-	Name string
-}
+var dbConnections map[string]*gorm.DB
 
-type dbPostgreSQL struct {
-	db
-	SslMode string
-	Tz      string
-}
+func Init() error {
+	dbConfigurations := make(map[string]Db)
 
-type dbMySQL struct {
-	db
-	Charset   string
-	ParseTime string
-	Loc       string
-}
-
-func (d *dbPostgreSQL) Init() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s", d.Host, d.User, d.Pass, d.Name, d.Port, d.SslMode, d.Tz)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(setLogMode()),
-	})
-	if err != nil {
-		return nil, err
+	for _, v := range config.Config.Databases {
+		switch v.Connection {
+		case "pgsql":
+			dbConfigurations[v.Alias] = &dbPostgreSQL{
+				db: db{
+					Host:        v.Host,
+					User:        v.User,
+					Pass:        v.Pass,
+					Port:        v.Port,
+					Name:        v.Name,
+					MaxIdleConn: v.MaxIdleConn,
+					MaxOpenConn: v.MaxOpenConn,
+					MaxLifetime: v.MaxLifetime,
+					AutoMigrate: v.Migration,
+					Seeder:      v.Seeder,
+				},
+				SslMode: v.Ssl,
+				Tz:      v.Tz,
+			}
+		case "mysql":
+			dbConfigurations[v.Alias] = &dbMySQL{
+				db: db{
+					Host:        v.Host,
+					User:        v.User,
+					Pass:        v.Pass,
+					Port:        v.Port,
+					Name:        v.Name,
+					MaxIdleConn: v.MaxIdleConn,
+					MaxOpenConn: v.MaxOpenConn,
+					MaxLifetime: v.MaxLifetime,
+					AutoMigrate: v.Migration,
+					Seeder:      v.Seeder,
+				},
+				Charset:   v.Charset,
+				ParseTime: v.ParseTime,
+				Loc:       v.Location,
+			}
+		}
 	}
-	return db, nil
+
+	for k, v := range dbConfigurations {
+		db, err := v.Init()
+		if err != nil {
+			panic(fmt.Sprintf("failed to connect to %s database", k))
+		}
+		dbConnections[k] = db
+	}
+
+	logrus.Info("successfully initialized database")
+	return nil
 }
 
-func (d *dbMySQL) Init() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%s&loc=%s", d.User, d.Pass, d.Host, d.Port, d.Name, d.Charset, d.ParseTime, d.Loc)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(setLogMode()),
-	})
-	if err != nil {
-		return nil, err
+func GetConnection(key string) (*gorm.DB, error) {
+	if dbConnections[key] == nil {
+		return nil, fmt.Errorf("connection is undefined")
 	}
-	return db, nil
-}
-
-func setLogMode() logger.LogLevel {
-	logLevel := logger.Info
-	env := os.Getenv("APP_ENV")
-	if env == "production" {
-		logLevel = logger.Error
-	}
-	return logLevel
+	return dbConnections[key], nil
 }

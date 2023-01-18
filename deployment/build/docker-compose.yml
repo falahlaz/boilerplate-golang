@@ -7,6 +7,7 @@ services:
     container_name: boilerplate-go-example
     depends_on:
       - db
+      - db2
     env_file:
       - ../../.env
     expose:
@@ -28,9 +29,24 @@ services:
       - dbdata:/var/lib/postgresql/data
     networks:
       - db-network
+  db2:
+    image: postgres:latest
+    container_name: db2-boilerplate-go-example
+    restart: always
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=supertestuser
+      - POSTGRES_DB=boilerplate_golang_db
+    ports:
+      - 5433:5432
+    volumes:
+      - dbdata2:/var/lib/postgresql/data
+    networks:
+      - db-network
 
 volumes:
   dbdata:
+  dbdata2:
 
 networks:
   db-network:
