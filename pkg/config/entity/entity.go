@@ -3,6 +3,7 @@ package entity
 type ConfigData struct {
 	Server     Server     `env:"server"`
 	Redis      Redis      `env:"redis"`
+	JWT        JWT        `env:"jwt"`
 	Multiconns []string   `env:"multiconns"`
 	Databases  []Database `env:"databases"`
 }
@@ -46,4 +47,8 @@ type Redis struct {
 	PoolSize     int    `default:"50" env:"REDIS_POOL_SIZE"`
 	MaxConnAge   int    `default:"10" env:"REDIS_MAX_CONN_AGE"`
 	MinIdleConns int    `default:"10" env:"REDIS_MIN_IDLE_CONNS"`
+}
+
+type JWT struct {
+	Secret string `required:"true" env:"JWT_SECRET"`
 }

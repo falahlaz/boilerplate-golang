@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -61,7 +60,12 @@ func (d *dbPostgreSQL) Init() (*gorm.DB, error) {
 
 	if d.db.AutoMigrate {
 		if err = db.AutoMigrate(Models...); err != nil {
-			logrus.Error("failed to migrate")
+			db.DisableForeignKeyConstraintWhenMigrating = true
+			time.Sleep(5 * time.Second)
+			db.AutoMigrate(Models...)
+			db.DisableForeignKeyConstraintWhenMigrating = false
+			time.Sleep(5 * time.Second)
+			db.AutoMigrate(Models...)
 		}
 	}
 
@@ -92,7 +96,12 @@ func (d *dbMySQL) Init() (*gorm.DB, error) {
 
 	if d.db.AutoMigrate {
 		if err = db.AutoMigrate(Models...); err != nil {
-			logrus.Error("failed to migrate")
+			db.DisableForeignKeyConstraintWhenMigrating = true
+			time.Sleep(5 * time.Second)
+			db.AutoMigrate(Models...)
+			db.DisableForeignKeyConstraintWhenMigrating = false
+			time.Sleep(5 * time.Second)
+			db.AutoMigrate(Models...)
 		}
 	}
 

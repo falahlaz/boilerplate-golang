@@ -1,3 +1,9 @@
 package database
 
-var Models []any = []any{}
+import "github.com/falahlaz/boilerplate-golang/internal/model"
+
+var Models []any = []any{
+	model.UserModel{},
+	model.BookModel{},
+	model.BorrowModel{},
+}

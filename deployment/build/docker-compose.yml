@@ -25,7 +25,7 @@ services:
       - POSTGRES_PASSWORD=supertestuser
       - POSTGRES_DB=boilerplate_golang_db
     ports:
-      - 5433:5433
+      - 5433:5432
     volumes:
       - dbdata:/var/lib/postgresql/data
     networks:
@@ -39,7 +39,7 @@ services:
       - POSTGRES_PASSWORD=supertestuser
       - POSTGRES_DB=boilerplate_golang_db
     ports:
-      - 5434:5434
+      - 5434:5432
     volumes:
       - dbdoubledata:/var/lib/postgresql/data
     networks:

@@ -19,6 +19,7 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jinzhu/configor v1.2.1
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
@@ -41,4 +42,5 @@ require (
 	gorm.io/driver/postgres v1.4.6
 	gorm.io/gorm v1.24.3 // indirect
 	gorm.io/plugin/dbresolver v1.4.1
+	gorm.io/plugin/soft_delete v1.2.0
 )
