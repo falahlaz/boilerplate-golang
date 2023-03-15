@@ -2,13 +2,16 @@ package database
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/falahlaz/boilerplate-golang/pkg/config"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 )
 
-var dbConnections map[string]*gorm.DB
+var connections map[string]*gorm.DB = make(map[string]*gorm.DB)
+var DBResolver *gorm.DB
 
 func Init() error {
 	dbConfigurations := make(map[string]Db)
@@ -23,9 +26,9 @@ func Init() error {
 					Pass:        v.Pass,
 					Port:        v.Port,
 					Name:        v.Name,
-					MaxIdleConn: v.MaxIdleConn,
-					MaxOpenConn: v.MaxOpenConn,
-					MaxLifetime: v.MaxLifetime,
+					MaxIdleConn: config.Config.Server.MaxIdleConn,
+					MaxOpenConn: config.Config.Server.MaxOpenConn,
+					MaxLifetime: config.Config.Server.MaxLifetime,
 					AutoMigrate: v.Migration,
 					Seeder:      v.Seeder,
 				},
@@ -40,9 +43,9 @@ func Init() error {
 					Pass:        v.Pass,
 					Port:        v.Port,
 					Name:        v.Name,
-					MaxIdleConn: v.MaxIdleConn,
-					MaxOpenConn: v.MaxOpenConn,
-					MaxLifetime: v.MaxLifetime,
+					MaxIdleConn: config.Config.Server.MaxIdleConn,
+					MaxOpenConn: config.Config.Server.MaxOpenConn,
+					MaxLifetime: config.Config.Server.MaxLifetime,
 					AutoMigrate: v.Migration,
 					Seeder:      v.Seeder,
 				},
@@ -58,7 +61,8 @@ func Init() error {
 		if err != nil {
 			panic(fmt.Sprintf("failed to connect to %s database", k))
 		}
-		dbConnections[k] = db
+		connections[k] = db
+		logrus.Info("successfully connected to database", k)
 	}
 
 	logrus.Info("successfully initialized database")
@@ -66,8 +70,41 @@ func Init() error {
 }
 
 func GetConnection(key string) (*gorm.DB, error) {
-	if dbConnections[key] == nil {
+	if connections[key] == nil {
 		return nil, fmt.Errorf("connection is undefined")
 	}
-	return dbConnections[key], nil
+	return connections[key], nil
+}
+
+func GetDB() (*gorm.DB, error) {
+	if DBResolver == nil {
+		return nil, fmt.Errorf("connection is undefined")
+	}
+	return DBResolver, nil
+}
+
+func Resolver() {
+	dbConn := []*gorm.DB{}
+	dbConfig := []gorm.Dialector{}
+
+	for _, v := range config.Config.Multiconns {
+		db, err := GetConnection(v)
+		if err != nil {
+			panic("Failed to make database resolver")
+		}
+		dbConn = append(dbConn, db)
+		dbConfig = append(dbConfig, db.Dialector)
+	}
+
+	dbConn[0].Use(
+		dbresolver.Register(dbresolver.Config{
+			Replicas: dbConfig,
+			Policy:   dbresolver.RandomPolicy{},
+		}).
+			SetConnMaxLifetime(time.Duration(config.Config.Server.MaxLifetime)).
+			SetMaxIdleConns(config.Config.Server.MaxIdleConn).
+			SetMaxOpenConns(config.Config.Server.MaxOpenConn))
+
+	DBResolver = dbConn[0]
+	logrus.Info("success create resolver")
 }

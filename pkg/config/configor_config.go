@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/falahlaz/boilerplate-golang/pkg/config/entity"
 	"github.com/jinzhu/configor"
+	"github.com/sirupsen/logrus"
 )
 
 type ConfigorConfig struct {
@@ -20,6 +21,7 @@ func NewConfigor(path string, pathEncrypted string) *ConfigorConfig {
 
 func (c *ConfigorConfig) Load(data *entity.ConfigData) error {
 	c.Data = data
+	logrus.Println("c.path", c.path)
 	err := configor.New(nil).Load(c.Data, c.path)
 	if err != nil {
 		return err

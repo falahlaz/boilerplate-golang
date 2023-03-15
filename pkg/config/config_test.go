@@ -1,17 +1,14 @@
-package main
+package config
 
 import (
 	"fmt"
 	"os"
+	"testing"
 
-	"github.com/falahlaz/boilerplate-golang/pkg/config"
 	"github.com/falahlaz/boilerplate-golang/pkg/config/entity"
-	"github.com/falahlaz/boilerplate-golang/pkg/database"
-	"github.com/falahlaz/boilerplate-golang/pkg/redis"
-	"github.com/labstack/echo/v4"
 )
 
-func init() {
+func TestConfigConfigor(t *testing.T) {
 	env := os.Getenv("APP_ENV")
 	conf := os.Getenv("CONFIG")
 	confPGP := os.Getenv("CONFIGPGP")
@@ -37,27 +34,9 @@ func init() {
 	}
 
 	// init configuration
-	defaultConfig := entity.NewConfigData()
+	// defaultConfig := entity.NewConfigData()
 
 	// load configuration
-	configConfigor := config.NewConfigor(path, pathPGP)
-	configConfigor.Load(defaultConfig)
-	config.Config = *defaultConfig
-}
-
-func main() {
-	e := echo.New()
-
-	// database
-	database.Init()
-	database.Resolver()
-
-	// redis
-	redisClient, err := redis.NewRedisClient()
-	if err != nil {
-		panic("ERROR DISINI :" + err.Error())
-	}
-	defer redisClient.Close()
-
-	e.Logger.Fatal(e.Start(":" + config.Config.Server.Port))
+	configConfigor := NewConfigor(path, pathPGP)
+	configConfigor.Load(&entity.ConfigData{})
 }

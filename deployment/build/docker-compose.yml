@@ -7,7 +7,7 @@ services:
     container_name: boilerplate-go-example
     depends_on:
       - db
-      - db2
+      - dbdouble
     env_file:
       - ../../.env
     expose:
@@ -15,6 +15,7 @@ services:
     restart: always
     networks:
       - db-network
+      - db-double-network
   db:
     image: postgres:latest
     container_name: db-boilerplate-go-example
@@ -24,12 +25,12 @@ services:
       - POSTGRES_PASSWORD=supertestuser
       - POSTGRES_DB=boilerplate_golang_db
     ports:
-      - 5432:5432
+      - 5433:5433
     volumes:
       - dbdata:/var/lib/postgresql/data
     networks:
       - db-network
-  db2:
+  dbdouble:
     image: postgres:latest
     container_name: db2-boilerplate-go-example
     restart: always
@@ -38,16 +39,33 @@ services:
       - POSTGRES_PASSWORD=supertestuser
       - POSTGRES_DB=boilerplate_golang_db
     ports:
-      - 5433:5432
+      - 5434:5434
     volumes:
-      - dbdata2:/var/lib/postgresql/data
+      - dbdoubledata:/var/lib/postgresql/data
     networks:
-      - db-network
+      - db-double-network
+  redis:
+    image: redis:latest
+    container_name: redis-boilerplate-go-example
+    restart: always
+    environment:
+      - REDIS_PASSWORD=testingredis
+    ports:
+      - 6379:6379
+    volumes:
+      - redisdata:/var/lib/redis/data
+    networks:
+      - redis-network
 
 volumes:
   dbdata:
-  dbdata2:
+  dbdoubledata:
+  redisdata:
 
 networks:
   db-network:
+    driver: bridge
+  db-double-network:
+    driver: bridge
+  redis-network:
     driver: bridge
